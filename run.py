@@ -1,6 +1,7 @@
 from foundation.utils import Workers
 from foundation.workers import LazyWorkers
 import argparse
+from utils import start_service
 
 parser = argparse.ArgumentParser(description="Start an HCI worker.")
 parser.add_argument(
@@ -17,12 +18,14 @@ def main():
     # lazy_workers = LazyWorkers(workers)
 
     # Basic services
-    workers.swarm.start_ntp(restart=True)
+    # workers.swarm.start_ntp(restart=True)
     workers.swarm.start_jupyterlab(
-        restart=True, volume_name='beam-jupyterlab'
+        restart=True,
+        volume_name='beam-jupyterlab',
+        tag='1.2',
     )
 
-    # workers.start_worker('workers/acquisition', service_name='acquisition', port=51190, restart=True)
+    start_service('services/acquisition')
 
 
 if __name__ == '__main__':
