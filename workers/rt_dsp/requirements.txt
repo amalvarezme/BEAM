@@ -1,0 +1,7 @@
+dunderlab-foundation
+radiant-framework
+figurestream
+chaski-confluent
+numpy
+dunderlab-timescaledbapp
+scipy

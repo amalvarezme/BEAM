@@ -15,14 +15,14 @@ def custom_callback(data_freqs, sweep_config):
     global buffer
 
     buffer = {
-        'config': sweep_config,
-        'data': data_freqs,
+        'sweep_config': sweep_config,
+        'data_freqs': data_freqs,
     }
 
 
 def serialize(buffer):
 
-    data = buffer['data']
+    data = buffer['data_freqs']
 
     for freq in data:
         data[freq] = {
