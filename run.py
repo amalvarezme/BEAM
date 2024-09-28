@@ -8,12 +8,14 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+requirements = ['chaski-confluent==0.1a5']
+
 
 # ----------------------------------------------------------------------
 def main():
     """"""
     workers = Workers(swarm_advertise_addr=args.advertise_addr)
-    # workers.stop_all_workers()
+    workers.stop_all_workers()
 
     host_workers = HostWorker(
         env='/home/user/python311/bin/python3',
@@ -25,6 +27,7 @@ def main():
         restart=True,
         port=51110,
         tag='1.2',
+        requirements=requirements,
     )
 
     workers.start_worker(
@@ -32,6 +35,7 @@ def main():
         service_name='acquisition_producer',
         restart=True,
         tag='1.2',
+        requirements=requirements,
     )
 
     workers.start_worker(
@@ -40,19 +44,21 @@ def main():
         restart=True,
         tag='1.2',
         port=51150,
+        requirements=requirements,
     )
 
     workers.swarm.start_jupyterlab(
         restart=True,
         volume_name='beam-jupyterlab',
         tag='1.2',
+        requirements=requirements,
     )
 
-    # host_workers.start_worker(
-    # 'services/acquisition',
-    # service_name='acquisition',
-    # restart=False,
-    # )
+    host_workers.start_worker(
+        'host_workers/acquisition',
+        service_name='acquisition',
+        restart=True,
+    )
 
 
 if __name__ == '__main__':

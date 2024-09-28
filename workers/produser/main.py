@@ -2,7 +2,6 @@ from chaski.streamer import ChaskiStreamer
 from dunderlab.api import aioAPI as API
 import asyncio
 import numpy as np
-import logging
 
 
 # ----------------------------------------------------------------------
@@ -16,14 +15,13 @@ async def run():
         run=True,
     )
     await streamer.connect('chaski-root-worker', 51110)
-    logging.warning('Connected...')
 
     while True:
 
         response = await api.acquisition.get()
 
         if not response:
-            await asyncio.sleep(0.1)
+            #             await asyncio.sleep(0.1)
             continue
 
         data = {
@@ -36,6 +34,7 @@ async def run():
         }
 
         await streamer.push('raw', data)
+        await asyncio.sleep(1)
 
 
 # ----------------------------------------------------------------------

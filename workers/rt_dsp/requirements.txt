@@ -1,7 +1,7 @@
 dunderlab-foundation
 radiant-framework
 figurestream
-chaski-confluent
+chaski-confluent==0.1a5
 numpy
 dunderlab-timescaledbapp
 scipy

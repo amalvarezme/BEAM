@@ -40,23 +40,21 @@ class Stream(FigureStream):
             run=True,
             subscriptions=['raw'],
         )
-        # asyncio.create_task(self.consumer.run())
         await self.consumer.connect('chaski-root-worker', 51110)
-        logging.warning('Connected...')
+        logging.warning('Connected.')
 
     # ----------------------------------------------------------------------
     async def stream(self):
         """"""
         await self.init_chaski()
 
-        history = []
+        history = {}
 
+        logging.warning('Waiting for data...')
         async with self.consumer as message_queue:
             async for incoming_message in message_queue:
                 self.axis.clear()
-
-                if len(history) > 20:
-                    history.pop(0)
+                logging.warning('Ploting...')
 
                 data = incoming_message.data
 
@@ -71,6 +69,7 @@ class Stream(FigureStream):
                         fs=sweep_config['sample_rate'],
                         nperseg=256,
                         scaling='spectrum',
+                        return_onesided=False,
                     )
 
                     sorted_indices = np.argsort(w)
@@ -78,11 +77,13 @@ class Stream(FigureStream):
                         w[sorted_indices] + f + sweep_config['step_offset']
                     )
                     x_sorted = x[sorted_indices]
-
                     x_sorted = 10 * np.log10(x_sorted)
 
-                    history.append(x_sorted)
-                    for j, h in enumerate(history[::1]):
+                    history.setdefault(f, []).append(x_sorted)
+                    if len(history[f]) > 20:
+                        history[f] = history[f][-20:]
+
+                    for j, h in enumerate(history[f][::1]):
 
                         self.axis.plot(
                             w_sorted / 1e6 + (j * 0.5),
@@ -107,9 +108,9 @@ class Stream(FigureStream):
                 # self.axis.set_ylim(-1e-9, 15e-9)
 
                 self.feed()
+                logging.warning('Feeding...')
 
 
 if __name__ == '__main__':
     figure_stream = Stream(host='0.0.0.0', port=environ('PORT', '5001'))
-    # figure_stream.stream()
     asyncio.run(figure_stream.stream())
