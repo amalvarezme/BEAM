@@ -54,10 +54,20 @@ def main():
         requirements=requirements,
     )
 
-    host_workers.start_worker(
-        'host_workers/acquisition',
-        service_name='acquisition',
+    py_env = '/home/user/python311/bin/python3'
+    main = '/home/user/BEAM/host_workers/acquisition/main.py'
+    workers.start_worker(
+        'watchdog',
+        service_name='watchdog-acquisition',
         restart=True,
+        tag='1.2',
+        env={
+            'hostname': 'host.docker.eth0',
+            'username': 'user',
+            'password': 'user',
+            'command': f'{py_env} {main}',
+        },
+        requirements=requirements,
     )
 
 

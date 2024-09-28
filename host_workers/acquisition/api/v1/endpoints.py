@@ -10,7 +10,9 @@ import numpy as np
 import gpsd2
 import time
 import RPi.GPIO as GPIO
+from copy import deepcopy
 
+from display import display
 
 router = APIRouter()
 buffer = {}
@@ -31,6 +33,14 @@ def get_gps():
             'longitude': long,
         }
     except:
+        display.line(
+            """SSID:
+DunderLab-BEAM
+PASSW:
+dunderlab
+"""
+        )
+
         gpsd2.connect()
         time.sleep(1)
         return get_gps()
@@ -87,9 +97,17 @@ async def initialice():
     )
 
     antenna = GPIO.input(14)
+    antenna_str = '1' if antenna else '2'
+    display.line(
+        f"""Antenna: {antenna_str}
+Bands: 88-108  MHz
+SampleRate: 20 MHz
+Step: 20 MHz
+    """
+    )
     return {
         'done': 'ok',
-        'antenna': '1' if antenna else '2',
+        'antenna': antenna_str,
     }
 
 
@@ -134,6 +152,17 @@ async def acquisition(
         callback=custom_callback,
         interleaved=False,
     )
+
+    antenna = GPIO.input(14)
+    antenna_str = '1' if antenna else '2'
+    display.line(
+        f"""Antenna: {antenna_str}
+Bands: {str(bands)}
+SampleRate: {int(sample_rate/1e6)} MHz
+Step: {int(step_width/1e6)} MHz
+    """
+    )
+
     return {'done': 'ok', **status}
 
 
@@ -151,9 +180,19 @@ async def get_buffer():
 @router.get('/status/')
 async def get_status():
     """"""
-    if buffer:
-        if 'data_freqs' in buffer:
-            buffer.pop('data_freqs')
-        return buffer
+    buffer_copy = deepcopy(buffer)
+
+    if buffer_copy:
+        if 'data_freqs' in buffer_copy:
+            buffer_copy.pop('data_freqs')
+
+        display.line(
+            f"""Antenna: {buffer_copy['antenna']}
+Bands: {str(buffer_copy['sweep_config']['bands'])}
+SampleRate: {int(buffer_copy['sweep_config']['sample_rate']/1e6)} MHz
+Step: {int(buffer_copy['sweep_config']['step_width']/1e6)} MHz"""
+        )
+
+        return buffer_copy
     else:
         return {}

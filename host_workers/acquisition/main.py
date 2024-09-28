@@ -4,7 +4,6 @@ from api.v1.endpoints import router as acquisition_router
 app = FastAPI()
 app.include_router(acquisition_router)
 
-
 if __name__ == "__main__":
     import uvicorn
 
