@@ -1,3 +1,5 @@
+from display import display
+
 from fastapi import FastAPI
 from api.v1.endpoints import router as acquisition_router
 

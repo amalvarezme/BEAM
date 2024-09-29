@@ -1,6 +1,6 @@
-from foundation.utils import Workers, HostWorker
-from foundation.workers import LazyWorkers
+from foundation.utils import Workers
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description="Start an HCI worker.")
 parser.add_argument(
@@ -8,7 +8,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-requirements = ['chaski-confluent==0.1a5']
+requirements = ['chaski-confluent==0.1a5', 'netifaces']
 
 
 # ----------------------------------------------------------------------
@@ -16,10 +16,6 @@ def main():
     """"""
     workers = Workers(swarm_advertise_addr=args.advertise_addr)
     workers.stop_all_workers()
-
-    host_workers = HostWorker(
-        env='/home/user/python311/bin/python3',
-    )
 
     workers.start_worker(
         'chaski_root',
@@ -55,19 +51,19 @@ def main():
     )
 
     py_env = '/home/user/python311/bin/python3'
-    main = '/home/user/BEAM/host_workers/acquisition/main.py'
+    main = os.path.abspath('host_workers/acquisition/main.py')
     workers.start_worker(
         'watchdog',
         service_name='watchdog-acquisition',
         restart=True,
         tag='1.2',
         env={
-            'hostname': 'host.docker.eth0',
+            'hostname': 'host.docker.eth0;host.docker.wlan0',
             'username': 'user',
             'password': 'user',
             'command': f'{py_env} {main}',
         },
-        requirements=requirements,
+        # requirements=requirements,
     )
 
 

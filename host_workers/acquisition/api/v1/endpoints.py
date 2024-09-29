@@ -17,9 +17,17 @@ from display import display
 router = APIRouter()
 buffer = {}
 
-
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(14, GPIO.OUT)
+
+
+display.line(
+    """SSID:
+DunderLab-BEAM
+PASSW:
+dunderlab
+"""
+)
 
 
 # ----------------------------------------------------------------------
@@ -33,14 +41,6 @@ def get_gps():
             'longitude': long,
         }
     except:
-        display.line(
-            """SSID:
-DunderLab-BEAM
-PASSW:
-dunderlab
-"""
-        )
-
         gpsd2.connect()
         time.sleep(1)
         return get_gps()
@@ -99,10 +99,10 @@ async def initialice():
     antenna = GPIO.input(14)
     antenna_str = '1' if antenna else '2'
     display.line(
-        f"""Antenna: {antenna_str}
-Bands: 88-108  MHz
+        f"""Bands: 88-108 MHz
 SampleRate: 20 MHz
-Step: 20 MHz
+StepWidth: 20 MHz
+Antenna: {antenna_str}
     """
     )
     return {
@@ -155,11 +155,14 @@ async def acquisition(
 
     antenna = GPIO.input(14)
     antenna_str = '1' if antenna else '2'
+
+    ranges = " ".join([f"{start}-{end}" for start, end in bands])
+
     display.line(
-        f"""Antenna: {antenna_str}
-Bands: {str(bands)}
+        f"""Bands: {ranges} MHz
 SampleRate: {int(sample_rate/1e6)} MHz
-Step: {int(step_width/1e6)} MHz
+StepWidth: {int(step_width/1e6)} MHz
+Antenna: {antenna_str}
     """
     )
 
@@ -186,11 +189,15 @@ async def get_status():
         if 'data_freqs' in buffer_copy:
             buffer_copy.pop('data_freqs')
 
+        bands = buffer_copy['sweep_config']['bands']
+        ranges = " ".join([f"{start}-{end}" for start, end in bands])
+
         display.line(
-            f"""Antenna: {buffer_copy['antenna']}
-Bands: {str(buffer_copy['sweep_config']['bands'])}
+            f"""Bands: {ranges} MHz
 SampleRate: {int(buffer_copy['sweep_config']['sample_rate']/1e6)} MHz
-Step: {int(buffer_copy['sweep_config']['step_width']/1e6)} MHz"""
+StepWidth: {int(buffer_copy['sweep_config']['step_width']/1e6)} MHz
+Antenna: {buffer_copy['antenna']}
+"""
         )
 
         return buffer_copy
