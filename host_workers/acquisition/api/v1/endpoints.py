@@ -57,7 +57,7 @@ def custom_callback(data_freqs, sweep_config):
         'sweep_config': sweep_config,
         'gps': get_gps(),
         'antenna': '1' if antenna else '2',
-        'data_freqs': data_freqs,
+        'data_freqs': deepcopy(data_freqs),
     }
 
 
