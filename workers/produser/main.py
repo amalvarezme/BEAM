@@ -21,16 +21,20 @@ async def run():
         response = await api.acquisition.get()
 
         if not response:
-            #             await asyncio.sleep(0.1)
+            continue
+
+        try:
+            data_complex = {
+                int(f): np.array(response['data_freqs'][f]['P'])
+                + np.array(response['data_freqs'][f]['Q']) * 1j
+                for f in response['data_freqs']
+            }
+        except:
             continue
 
         data = {
             'sweep_config': response['sweep_config'],
-            'data_freqs': {
-                int(f): np.array(response['data_freqs'][f]['P'])
-                + np.array(response['data_freqs'][f]['Q']) * 1j
-                for f in response['data_freqs']
-            },
+            'data_freqs': data_complex,
         }
 
         await streamer.push('raw', data)
